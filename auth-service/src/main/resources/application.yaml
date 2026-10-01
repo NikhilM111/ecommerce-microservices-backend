@@ -1,0 +1,20 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    # Connects to the host port 8003 we defined in docker-compose for postgres-user
+    url: jdbc:postgresql://localhost:8003/user_db
+    username: auth_user
+    password: auth_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

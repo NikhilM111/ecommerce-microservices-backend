@@ -1,0 +1,29 @@
+server:
+  port: 9002
+spring:
+  application:
+    name: inventory-model
+
+  datasource:
+    # Connects to the host port 8003 we defined in docker-compose for postgres-user
+    url: jdbc:postgresql://localhost:8002/inventory_db
+    username: inventory_user
+    password: inventory_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# --- Distributed Tracing Configuration ---
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # 1.0 means track 100% of requests
+  zipkin:
+    tracing:
+        endpoint: http://localhost:9411/api/v2/spans

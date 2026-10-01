@@ -1,0 +1,58 @@
+server:
+  port: 9001
+spring:
+  application:
+    name: order-model
+
+  datasource:
+    # Connects to the host port 8003 we defined in docker-compose for postgres-user
+    url: jdbc:postgresql://localhost:8001/order_db
+    username: order_user
+    password: order_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+#============================== Resilence4j set-up ===================================
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventory:
+        registerHealthIndicator: true
+        event-consumer-buffer-size: 10
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+# --- Distributed Tracing Configuration ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # Expose all actuator endpoints
+  tracing:
+    sampling:
+      probability: 1.0 # 100% trace sampling
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+inventory:
+  url: http://localhost:9002

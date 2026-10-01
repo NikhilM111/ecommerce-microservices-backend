@@ -1,0 +1,90 @@
+services:
+
+#  ======================= order_db setup ====================================
+  postgres-order:
+    image: postgres:15-alpine
+    container_name: postgres-order
+    ports:
+      - "8001:5432"
+    environment:
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_password
+      POSTGRES_DB: order_db
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+
+#========================== inventory_db setup ==================================
+  postgres-inventory:
+    image: postgres:15-alpine
+    container_name: postgres-inventory
+    ports:
+      - "8002:5432"
+    environment:
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventory_password
+      POSTGRES_DB: inventory_db
+    volumes:
+      - postgres_inventory_data:/var/lib/postgresql/data
+
+#=========================== user_db setup ========================================
+  postgres-user:
+    image: postgres:15-alpine
+    container_name: postgres_user
+    ports:
+      - "8003:5432"
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+      POSTGRES_DB: user_db
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+
+#============================ product_db setup ======================================
+  postgres-product:
+    image: postgres:15-alpine
+    container_name: postgres-product
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_password
+    ports:
+      - "8004:5432"
+
+#============================ redis setup =========================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+
+#============================= zipkin setup =========================================
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+#============================= kafka setup =========================================
+  kafka:
+    image: bitnamilegacy/kafka:3.4.1-debian-11-r0
+    container_name: kafka-broker
+    ports:
+      - "9092:9092"
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+
+# ============================= ROOT VOLUMES =========================================
+# This is required to physically create the named volumes mapped in the services above
+volumes:
+  postgres_order_data:
+  postgres_inventory_data:
+  postgres_user_data:
